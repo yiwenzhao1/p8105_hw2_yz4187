@@ -110,3 +110,44 @@ snp_pols_unemployment =
 'snp_data' represents the closing values of snp in each year adn month.
 'unemployment_data' represents that the unemployment rate in each moth and each year.
 'snp_pols_unemployment' merge the three date frames into one table and represents that the all the information of three tables together.
+
+
+## Problem 3
+```{r}
+baby_name = 
+  read.csv(file = "Popular_Baby_Names.csv") %>%
+  janitor::clean_names() %>% 
+  mutate(
+    gender = str_to_lower(gender),
+    ethnicity = str_to_lower(ethnicity),
+    child_s_first_name = str_to_lower(child_s_first_name)
+    ) %>% 
+  distinct()
+
+view(baby_name)
+```
+
+'Olivia' and 'Male'
+
+```{r}
+olivia = 
+  filter(baby_name, gender == "female", child_s_first_name == "olivia") %>% 
+  select(year_of_birth, ethnicity, rank)
+
+male= 
+  filter(baby_name, gender == "male", rank == "1") %>% 
+  select(child_s_first_name, year_of_birth, ethnicity, )
+```
+
+Scattorplot
+
+```{r}
+scatter_plot = 
+  filter( baby_name, 
+          year_of_birth == "2016", 
+          gender == "male", 
+          ethnicity == "white non hispanic") %>% 
+  select(rank, count)
+ggplot(scatter_plot, aes(x = rank, y = count)) + geom_point() +labs( "Name popularity")
+```
+
