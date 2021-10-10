@@ -53,3 +53,60 @@ median = median(pull(filter(trashwheel_data, year == 2019 & sports_balls)))
 Comments about these data: In Mr.Trash Wheel dataset, the data describes different types of trash of different dumpsters from 2014 to 2021. The key variables is 'dumpster', which is the nrow(trashwheel_data)'. The columes 'r ncol(trashwheel_data)' representes the weights, volumns, and different types of trashes. 
 The precipitation data set combines the precipitation data in 2018 and 2019. 'r nrow(precipdata_combine) shows different months recorded, and the 'r ncol(precipdata_combine) represents years, months and total inch of precipitation. The total precipitation in 2018 is total = sum(select(filter(precipdata_combine, year == 2018), total_inch)) = 70.33. The median number of sports ball in dumpster in 2019 is median = median(pull(filter(trashwheel_data, year == 2019 & sports_balls))) = 50.67.
 
+
+## Problem 2
+
+*This problem uses the FiveThirtyEight data; these data were gathered to create the interactive graphic on this page. In particular, we’ll use the data in pols-month.csv, unemployment.csv, and snp.csv. Our goal is to merge these into a single data frame using year and month as keys across datasets.*
+
+*First, clean the data in pols-month.csv*
+
+```{r}
+
+pols_month = read_csv("fivethirtyeight_datasets/pols-month.csv") %>%
+  janitor::clean_names() %>%
+  separate(mon, c("year", "month", "day")) %>%
+  mutate(month = month.abb[as.numeric(month)],
+         president = ifelse(prez_gop == 1, "gop", "dem")) %>%
+ select(-day, -prez_dem, -prez_gop)
+```
+
+*Second, clean the data in snp.csv using a similar process to the above*
+
+```{r}
+snp_data = 
+  read.csv(file = "fivethirtyeight_datasets/snp.csv") %>% 
+  janitor::clean_names() %>% 
+  separate(date, c("year", "month", "day")) %>% 
+  mutate(month = month.abb[as.integer(month)]) %>% 
+  select(year, month, close)
+```
+
+*Third, tidy the unemployment data so that it can be merged with the previous datasets.*
+
+```{r}
+unemployment_data = 
+  read.csv(file = "fivethirtyeight_datasets/unemployment.csv") %>% 
+  pivot_longer(
+    Jan:Dec,
+    names_to = "month",
+    values_to = "rate"
+  ) %>% 
+  mutate(month = month.name[match(pull(., month), month.abb)],
+         year = as.character(Year)) %>% 
+  select(year, month, rate)
+
+```
+*Join the datasets by merging snp into pols, and merging unemployment into the result.*
+
+```{r}
+snp_pols_unemployment = 
+  left_join(pols_month, snp_data,by = c("year", "month")) %>% 
+  left_join(unemployment_data, by = c("year", "month"))
+```
+
+*Write a short paragraph about these datasets. Explain briefly what each dataset contained, and describe the resulting dataset (e.g. give the dimension, range of years, and names of key variables).*
+
+'pols_month' represents that whether the president is 'dem' or 'gop' in different months and different years.
+'snp_data' represents the closing values of snp in each year adn month.
+'unemployment_data' represents that the unemployment rate in each moth and each year.
+'snp_pols_unemployment' merge the three date frames into one table and represents that the all the information of three tables together.
