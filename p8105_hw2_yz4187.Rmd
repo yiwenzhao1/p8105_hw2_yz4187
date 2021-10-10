@@ -148,6 +148,6 @@ scatter_plot =
           gender == "male", 
           ethnicity == "white non hispanic") %>% 
   select(rank, count)
-ggplot(scatter_plot, aes(x = rank, y = count)) + geom_point() +labs( "Name popularity")
+ggplot(scatter_plot, aes(x = rank, y = count)) + geom_point() +labs( "Name popularity", x = "rank", y = "name")
 ```
 
