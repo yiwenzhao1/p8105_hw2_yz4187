@@ -7,5 +7,49 @@ output: github_document
 
 ```{r, echo = FALSE, message = FALSE}
 library(tidyverse)
+library(readxl)
+library(dplyr)
 ```
+
+## Problem 1
+
+*Read and clean the Mr. Trash Wheel sheet:*
+
+```{r}
+trashwheel_data = read_excel("data/Trash-Wheel-Collection-Totals-7-2020-2.xlsx", sheet = "Mr. Trash Wheel", range = "A2:N535", ) %>%                                                 
+
+janitor::clean_names() %>% 
+drop_na(dumpster) %>% 
+mutate(sports_balls = round(sports_balls, 0))
+
+names(trashwheel_data)
+view(trashwheel_data)
+```
+
+*Read and clean precipitation data for 2018 and 2019. For each, omit rows without precipitation data and add a variable for year. Next, combine precipitation datasets and convert month to a character variable (the variable month.name is built into R and should be useful)*
+
+```{r}
+precipdata_2018 = read_excel("data/Trash-Wheel-Collection-Totals-7-2020-2.xlsx", sheet = "2018 Precipitation", range = "A2:B14") %>% 
+janitor::clean_names() %>% 
+mutate(year = "2018")
+
+precipdata_2019 = read_excel("data/Trash-Wheel-Collection-Totals-7-2020-2.xlsx", sheet = "2019 Precipitation", range = "A2:B14") %>% 
+janitor::clean_names() %>% 
+mutate(year = "2019")
+
+precipdata_combine = 
+  bind_rows(precipdata_2018, precipdata_2019) %>%
+  mutate(month = month.name[month]) %>% 
+  select(year, month, total_inch = total)
+
+view(precipdata_combine)
+
+total = sum(select(filter(precipdata_combine, year == 2018), total_inch))
+median = median(pull(filter(trashwheel_data, year == 2019 & sports_balls)))
+```
+
+*Write a paragraph about these data; you are encouraged to use inline R. Be sure to note the number of observations in both resulting datasets, and give examples of key variables. For available data, what was the total precipitation in 2018? What was the median number of sports balls in a dumpster in 2019?*
+
+Comments about these data: In Mr.Trash Wheel dataset, the data describes different types of trash of different dumpsters from 2014 to 2021. The key variables is 'dumpster', which is the nrow(trashwheel_data)'. The columes 'r ncol(trashwheel_data)' representes the weights, volumns, and different types of trashes. 
+The precipitation data set combines the precipitation data in 2018 and 2019. 'r nrow(precipdata_combine) shows different months recorded, and the 'r ncol(precipdata_combine) represents years, months and total inch of precipitation. The total precipitation in 2018 is total = sum(select(filter(precipdata_combine, year == 2018), total_inch)) = 70.33. The median number of sports ball in dumpster in 2019 is median = median(pull(filter(trashwheel_data, year == 2019 & sports_balls))) = 50.67.
 
